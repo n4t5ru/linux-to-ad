@@ -3,13 +3,12 @@
 #Author: n4t5u
 #email: hello@nasru.me
 
-echo 'Welcome to Linux-to-AD'
-echo 'Choose your Distro
-        1. Debian
-        2. RPM
-        3. Arch'
-
-
+printf 'Welcome to Linux-to-AD\n'
+printf 'Choose your Distro
+    1. Debian
+    2. RPM
+    3. Arch\n
+    Enter Number: \n'
 read number
 
 case $number in
@@ -73,11 +72,12 @@ case $number in
     ;;
 
     3)
+        #meaning this is a work in progress.
         echo 'Why do you wanna join a domain with Arch....'
     ;;
 
     *)
-        echo 'Stick to the numbers....'
+        echo 'Stick to the specified numbers....'
     ;;
 esac
 
