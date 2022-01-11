@@ -1,2 +1,5 @@
-# linux-to-ad
-Script to register a linux machine to Active Directory
+# About
+Script to join Windows ActiveDirectory domain with a linux machine/system
+
+# Before Running
+Give the script the required permissions.
