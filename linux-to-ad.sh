@@ -3,82 +3,80 @@
 #Author: n4t5u
 #email: hello@nasru.me
 
-printf 'Welcome to Linux-to-AD\n'
+printf '\nWelcome to Linux-to-AD\n'
 printf 'Choose your Distro
-    1. Debian
-    2. RPM
-    3. Arch\n
-    Enter Number: \n'
+1. Debian
+2. RPM
+3. Arch\n
+Enter Number: \n'
 read number
 
 case $number in
-    #for debian based distros
-    1) 
-        echo 'Enter your domain Name:'
-        read domainName
-        echo 'Enter your Hostname Name:'
-        read hostName
-        echo 'Enter Domain Admin User'
-        read domainAdmin
+#for debian based distros
+1) 
+echo 'Enter your domain Name:'
+read domainName
+echo 'Enter your Hostname Name:'
+read hostName
+echo 'Enter Domain Admin User'
+read domainAdmin
 
-        pamConfig="<< EOF 
-                Name: activate mkhomedir
-                Default: yes
-                Priority: 900
-                Session-Type: Additional
-                Session:
-                        required        pam_mkhomedir.so umask=0022 skel=/etc/skel
-                EOF"
+echo 'You will be prompted to enter domain admin password in a bit....'
 
-        echo 'You will be prompted to enter domain admin password in a bit....'
+#change hostname to user preference
+hostnamectl set-hostname $hostName.$domainName
 
-        #change hostname to user preference
-        hostnamectl set-hostname $hostName.$domainName
+#install the initial required tools
+apt install -y realmd libnss-sss libpam-sss sssd sssd-tools adcli samba-common-bin oddjob oddjob-mkhomedir packagekit
 
-        #install the initial required tools
-        apt install -y realmd libnss-sss libpam-sss sssd sssd-tools adcli samba-common-bin oddjob oddjob-mkhomedir packagekit
+#join the doiman
+realm join -v -U $domanAdmin $domainName
 
-        #join the doiman
-        realm join -v -U $domanAdmin $domainName
+cat <<EOF >> /usr/share/pam-configs/mkhomedir 
+Name: activate mkhomedir
+Default: yes
+Priority: 900
+Session-Type: Additional
+Session: required   
+pam_mkhomedir.so umask=0022 skel=/etc/skel
+EOF
 
-        cat > /usr/share/pam-configs/mkhomedir $pamConfig
+pam-auth-update
 
-        pam-auth-update
+systemctl restart sssd
+;;
 
-        systemctl restart sssd
-    ;;
+#for RPM based distros
+2)
+echo 'Enter your domain Name:'
+read domainName
+echo 'Enter your Hostname Name:'
+read hostName
+echo 'Enter Domain Admin User'
+read domainAdmin
 
-    #for RPM based distros
-    2)
-        echo 'Enter your domain Name:'
-        read domainName
-        echo 'Enter your Hostname Name:'
-        read hostName
-        echo 'Enter Domain Admin User'
-        read domainAdmin
+echo 'You will be prompted to enter domain admin password in a bit....'
 
-        echo 'You will be prompted to enter domain admin password in a bit....'
+#change hostname to user preference
+hostnamectl set-hostname $hostName.$domainName
 
-        #change hostname to user preference
-        hostnamectl set-hostname $hostName.$domainName
+#install the initial required tools
+yum install -y realmd libnss-sss libpam-sss sssd sssd-tools adcli samba-common-bin oddjob oddjob-mkhomedir packagekit
 
-        #install the initial required tools
-        yum install -y realmd libnss-sss libpam-sss sssd sssd-tools adcli samba-common-bin oddjob oddjob-mkhomedir packagekit
+#join the doiman
+realm join -v -U $domanAdmin $domainName
 
-        #join the doiman
-        realm join -v -U $domanAdmin $domainName
+systemctl restart sssd
+;;
 
-        systemctl restart sssd
-    ;;
+3)
+#meaning this is a work in progress.
+echo 'Why do you wanna join a domain with Arch....'
+;;
 
-    3)
-        #meaning this is a work in progress.
-        echo 'Why do you wanna join a domain with Arch....'
-    ;;
-
-    *)
-        echo 'Stick to the specified numbers....'
-    ;;
+*)
+echo 'Stick to the specified numbers....'
+;;
 esac
 
 
